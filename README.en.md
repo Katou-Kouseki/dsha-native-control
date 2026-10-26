@@ -1,29 +1,25 @@
 # DSHA Native Control
 
-Control **the Android phone that DSH itself runs on** — no ADB, no USB, no PC, no `unzip` required.
-Desktop installs keep the original ADB backend, so existing users are unaffected.
+Control and debug the Android phone that DSH (DSHA, the Android build) runs on — no ADB, no USB, no PC.
 
 [中文](README.md) | [English](README.en.md)
 
-> An independent project, derived from [dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat)
-> (Apache-2.0). See "Acknowledgements & license" below.
-
 ## Features
 
-### Native on-device mode (the core of this project)
+### Native on-device mode
 
-- **Zero external dependencies**: when DSH runs on the phone, the plugin controls the device directly through
-  `su` + `input`/`screencap` — it never downloads platform-tools, never calls adb, and never needs a PC.
-- **Automatic backend selection**: the plugin config key `backend` accepts `auto` (default) / `native` / `adb`.
-  `auto` prefers native on an Android host, keeps ADB on desktop, and falls back to ADB when the native probe fails.
-- **Diagnostics panel**: the toolbar "diagnostics" button shows backend kind and selection reason, three-state Root
-  (available / denied / not probed), per-device Injector state (ready / starting / off / blocked), the current
+- **Direct on-device control**: when DSH runs on the phone, the plugin drives the device through
+  `su` + `input`/`screencap` — it never downloads platform-tools, never calls adb, and needs no second machine.
+- **Automatic backend selection**: the config key `backend` accepts `auto` (default) / `native` / `adb`.
+  `auto` prefers native on an Android host, uses ADB on desktop, and falls back to ADB when the native probe fails.
+- **Diagnostics panel**: the toolbar "diagnostics" button shows the backend kind and selection reason, three-state
+  Root (available / denied / not probed), per-device Injector state (ready / starting / off / blocked), the current
   screenshot frame (size / rotation / frameId / coordinate space), and probe results for
   `su` / `input` / `screencap` / `logcat` / `app_process` / `base64` / `wm` / `uiautomator`.
 - **Mode-aware UI**: in native mode the status bar reads "Native 本机模式" and the one-click adb install button is
-  hidden; the device dropdown shows "本机设备（DSHA Native）". ADB mode behaves exactly as before.
+  hidden; the device dropdown shows "本机设备（DSHA Native）". ADB mode presents the usual desktop debugging view.
 
-### Debug workbench (inherited from upstream, extended here)
+### Debug workbench
 
 - **Logcat panel**: logcat stream auto-attached to devices in debug mode (`-v threadtime`), level / multi-keyword /
   package filters, pause, clear, copy, export; logs persist under `~/.dsh/dsha-native-control/logs` so history
@@ -35,13 +31,12 @@ Desktop installs keep the original ADB backend, so existing users are unaffected
 - **Batched actions**: `input_batch` runs up to 20 actions serially in one call
   (`tap` / `swipe` / `keyevent` / `wait` / `screenshot`), reports the failing action index, stops on error by
   default, and never replays a timed-out action. Batches do not expose arbitrary shell.
-- **All 30 upstream capabilities preserved**: process/memory/reverse-engineering tools, WiFi debugging, APK install,
-  UI hierarchy dump, screen mirroring and remote control.
-- **33 agent tools** in total (names stay `logcat_*` for compatibility), with `native_status`,
-  `native_display_info` and `input_batch` added by this project.
-- **adb install without an unzip binary**: in ADB mode, when the system extractor is unavailable, installing
-  platform-tools falls back to a built-in pure-JS ZIP extractor (Node `zlib`) instead of failing with
-  `spawn unzip ENOENT`.
+- **Full debugging toolkit**: process list / memory maps / memory search and dump, Frida deployment and script
+  templates, WiFi debugging, APK install, UI hierarchy dump, screen mirroring and remote control, events view.
+- **33 agent tools** spanning device, screen, input, log, process and memory layers — `native_status`,
+  `native_display_info` and `input_batch` are designed specifically for on-device control.
+- **One-click adb install**: in ADB mode the plugin downloads platform-tools and wires them in; extraction is a
+  built-in pure-JS implementation, so it works even when the system has no `unzip` binary.
 
 ## Install
 
@@ -78,7 +73,7 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 | --- | --- |
 | `auto` (default) | prefer native on an Android host, ADB on desktop, fall back to ADB when the native probe fails |
 | `native` | force native; no ADB, no one-click adb install; errors out (no fallback) when the local shell is unusable |
-| `adb` | force the original ADB flow (troubleshooting / rollback — a full bypass of the native work) |
+| `adb` | force the ADB flow (troubleshooting and comparison) |
 
 ## Limitations & troubleshooting
 
@@ -96,8 +91,8 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
   Magisk's superuser list, then press refresh.
 - **Injector shows "blocked"**: after repeated launch failures the injector disables itself and falls back to
   equivalent stock commands (still fully functional, just slower per action); restarting DSH retries deployment.
-- **One-click adb install reports an extraction error**: this build ships a pure-JS extraction fallback; if it still
-  fails, the diagnostic message includes both the system-extractor and JS-fallback reasons.
+- **One-click adb install reports an extraction error**: the diagnostic message includes both the system-extractor
+  and built-in JS-extraction reasons, so you can tell a failed download from a directory-permission problem.
 - **Taps land in the wrong place**: `input_*` expects raw pixel coordinates of the *current* screenshot. Take a
   fresh `screen_capture` first and pick coordinates off that frame — never reuse pre-rotation coordinates.
 
@@ -129,7 +124,7 @@ lib/
   backends/
     manager.js       backend manager (auto/native/adb)
     native.js        on-device backend (su/input/screencap, three-state root, capability probe)
-    adb.js           the original ADB backend
+    adb.js           the ADB backend
     types.js         device descriptors, coordinate validation, frame metadata
   injector-jar.js    injector dex (base64 embedded)
 tools/injector/      Injector.java and build script
@@ -138,11 +133,8 @@ selfcheck.mjs        self-check entry point
 test-*.mjs           regression tests
 ```
 
-## Acknowledgements & license
+## Acknowledgements
 
-- Derived from **[dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat)** by WindyPro-rourou (Apache-2.0).
-  The log panel, crash snapshots, and much of the process/memory/RE toolchain come from that project — many thanks.
-- Added by this project: the backend abstraction (native/ADB), unified coordinates and frame metadata, native
-  Injector deployment with fallback, `input_batch`, the diagnostics panel, extraction-without-unzip support, and the
-  name-based self-check plus test suite.
-- License: **Apache License 2.0** — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+The panel UI, log and crash-snapshot flow, and the process/memory/RE tooling started from
+[dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat) (Apache-2.0) — thanks to its author.
+See [NOTICE](NOTICE) for provenance and the scope of changes; licensed under [Apache-2.0](LICENSE).

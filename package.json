@@ -1,6 +1,6 @@
 {
   "name": "@katou-kouseki/dsha-native-control",
-  "description": "DSHA Native Control — an Android debugging workbench for the DSH web GUI that controls the device DSH itself runs on without ADB/USB/a PC (native backend via su/input/screencap), while keeping the original adb backend for desktop users. Live logcat stream, captured-crash snapshots, screenshots with coordinate metadata, batched gestures, and agent tools.",
+  "description": "DSHA Native Control — an Android debugging workbench for the DSH web GUI that controls the device DSH itself runs on without ADB, USB or a PC (native backend via su/input/screencap), with an ADB backend for desktop use. Live logcat stream, crash snapshots, coordinate-accurate screenshots, batched gestures, and 33 agent tools.",
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@11.22.0",

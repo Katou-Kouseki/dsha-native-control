@@ -1,41 +1,39 @@
 # DSHA Native Control
 
-让 **DSH（DSHA，Android 版）在手机本机运行时直接控制这台手机** —— 不需要 ADB、USB、电脑，也不需要
-`unzip`。桌面环境仍保留原有 ADB 后端，老用户升级后照常使用。
+让 DSH（DSHA，Android 版）在手机本机运行时，直接控制和调试这台手机，不依赖 ADB、USB 或电脑。
 
 [中文](README.md) | [English](README.en.md)
 
-> 本项目是独立项目，代码基于 [dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat)（Apache-2.0）
-> 改造而来，特此致谢。详见文末「致谢与许可」。
-
 ## 特性
 
-### Native 本机模式（本项目核心）
+### Native 本机模式
 
-- **零外部依赖**：DSH 运行在手机上时，插件通过 `su` + `input`/`screencap` 直接控制本机，不下载 platform-tools、
-  不调用 adb、不依赖电脑。
-- **后端自动选择**：插件配置 `backend` 支持 `auto`（默认）/ `native` / `adb` 三档。`auto` 在 Android 宿主上优先
-  Native，桌面环境自动走 ADB，Native 探测失败也会回落 ADB。
+- **直连本机**：DSH 运行在手机上时，插件通过 `su` + `input`/`screencap` 直接操作本机，不下载
+  platform-tools、不调用 adb、不需要第二台设备参与。
+- **后端自动选择**：配置项 `backend` 支持 `auto`（默认）/ `native` / `adb`。`auto` 在 Android 宿主上
+  优先 Native，桌面环境自动使用 ADB，Native 探测失败时回落 ADB。
 - **诊断面板**：工具栏「诊断」按钮展示后端类型与选择原因、Root 三态（可用/被拒绝/未探测）、Injector
-  每设备状态（ready/starting/off/blocked）、截图帧信息（尺寸/rotation/frameId/坐标空间）、以及
+  每设备状态（ready/starting/off/blocked）、当前截图帧（尺寸/rotation/frameId/坐标空间），以及
   `su`/`input`/`screencap`/`logcat`/`app_process`/`base64`/`wm`/`uiautomator` 的探测结果。
-- **界面按模式自适应**：Native 下状态栏显示「Native 本机模式」并隐藏「一键安装 adb」；设备下拉显示
-  「本机设备（DSHA Native）」；ADB 模式下界面与行为保持不变。
+- **界面按模式自适应**：Native 下状态栏显示「Native 本机模式」并隐藏「一键安装 adb」，设备下拉显示
+  「本机设备（DSHA Native）」；ADB 下界面按桌面调试习惯呈现。
 
-### 调试工作台（继承自上游并增强）
+### 调试工作台
 
-- **logcat 面板**：自动附加设备日志流（`-v threadtime`），级别/多关键词/包名过滤，暂停、清屏、复制、导出；
-  日志落盘 `~/.dsh/dsha-native-control/logs` 支持历史回溯，崩溃/ANR 自动截图存档到 `.../crashes`。
+- **logcat 面板**：自动附加设备日志流（`-v threadtime`），级别/多关键词/包名过滤，暂停、清屏、复制、
+  导出；日志落盘 `~/.dsh/dsha-native-control/logs` 支持历史回溯，崩溃/ANR 自动截图存档到 `.../crashes`。
 - **截图与坐标元数据**：`screen_capture` 返回 `frameId` / `imageWidth` / `imageHeight` / `rotation` /
-  `coordinateSpace: 'screenshot-pixels'` / `capturedAt`。内部坐标统一为**当前截图的原始像素**，旋转或分辨率
-  变化会让旧帧失效，超范围坐标**明确报错而非静默裁剪**。
-- **批量动作**：`input_batch` 一次调用串行执行最多 20 个动作（`tap`/`swipe`/`keyevent`/`wait`/`screenshot`），
-  失败能定位动作序号，`stopOnError` 默认停止后续动作，动作超时**不自动重放**。批次不开放任意 shell。
-- **原有 30 项能力全部保留**：进程/内存/逆向工具、WiFi 无线调试、APK 安装、UI 层级 dump、屏幕投屏与远程操控等。
-- **agent 工具共 33 个**（工具名保持 `logcat_*` 以兼容既有用法），其中本项目新增 `native_status`、
-  `native_display_info`、`input_batch`。
-- **无解压器也能装 adb**：ADB 模式下一键安装 platform-tools 时，系统解压器不可用会自动回退到内置纯 JS ZIP
-  解包（Node `zlib`），不再报 `spawn unzip ENOENT`。
+  `coordinateSpace: 'screenshot-pixels'` / `capturedAt`。内部坐标统一为**当前截图的原始像素**，旋转或
+  分辨率变化会让旧帧失效，超范围坐标**明确报错而非静默裁剪**。
+- **批量动作**：`input_batch` 一次调用串行执行最多 20 个动作（`tap`/`swipe`/`keyevent`/`wait`/
+  `screenshot`），失败能定位动作序号，`stopOnError` 默认停止后续动作，动作超时**不自动重放**；批次不
+  开放任意 shell。
+- **完整调试能力**：进程列表/内存映射/内存搜索与 dump、Frida 部署与脚本模板、WiFi 无线调试、APK 安装、
+  UI 层级 dump、屏幕投屏与远程操控、events 事件视图。
+- **33 个 agent 工具**：设备、屏幕、输入、日志、进程、内存各层能力均对 agent 开放，其中 `native_status`、
+  `native_display_info`、`input_batch` 面向本机控制场景设计。
+- **一键安装 adb**：ADB 模式下从镜像下载 platform-tools 并自动接入；解压内置纯 JS 实现，系统没有
+  `unzip` 也能完成安装。
 
 ## 安装
 
@@ -48,7 +46,7 @@ pnpm --dir "$env:USERPROFILE\.dsh\profiles\web" add link:<本仓库绝对路径>
 
 之后重启 DSH Web（`dsh web`），刷新 GUI（Ctrl+F5）。
 
-> 本插件通过 `package.json` 的 `dsh.bundle.patch` 自动注入 `cordis.patch.yml`，无需修改 DSH 源码。
+> 插件通过 `package.json` 的 `dsh.bundle.patch` 自动注入 `cordis.patch.yml`，无需修改 DSH 源码。
 
 ### 方式二：npm（发布后可用）
 
@@ -68,13 +66,11 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 
 ## 后端模式配置
 
-插件配置项 `backend`：
-
-| 取值 | 行为 |
+| `backend` | 行为 |
 | --- | --- |
-| `auto`（默认） | Android 宿主优先 Native；桌面走 ADB；Native 探测失败自动回落 ADB |
+| `auto`（默认） | Android 宿主优先 Native；桌面使用 ADB；Native 探测失败自动回落 ADB |
 | `native` | 强制本机后端，不使用 ADB、不触发一键安装 adb；本机 shell 不可用时直接报错不回退 |
-| `adb` | 强制原版 ADB 流程（排障与回滚用，完全旁路 Native） |
+| `adb` | 强制 ADB 流程（排障与对照用） |
 
 ## 限制与故障排查
 
@@ -91,8 +87,8 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
   DSH 授予 `su` 后点「刷新」。
 - **Injector 显示「已阻断」**：注入器连续启动失败后会自行停用并回退等价的系统命令（功能仍可用，单次动作
   略慢）；重启 DSH 会重新尝试部署。
-- **一键安装 adb 报解压错误**：本版已内置纯 JS 解包回退；若仍失败，诊断信息会同时给出系统解压器与 JS
-  回退两层原因。
+- **一键安装 adb 报解压错误**：诊断信息会同时给出系统解压器与内置 JS 解包两层原因，便于定位是网络下载
+  失败还是目录权限问题。
 - **点击位置不对**：`input_*` 要求传「当前截图的原始像素坐标」。先用 `screen_capture` 拿最新帧，再按图点选，
   不要复用旋转前的旧坐标。
 
@@ -124,7 +120,7 @@ lib/
   backends/
     manager.js       后端管理器（auto/native/adb）
     native.js        本机后端（su/input/screencap，Root 三态，能力探测）
-    adb.js           原 ADB 后端
+    adb.js           ADB 后端
     types.js         设备描述符、坐标校验、帧元数据
   injector-jar.js    注入器 dex（base64 内嵌）
 tools/injector/      Injector.java 与构建脚本
@@ -133,10 +129,8 @@ selfcheck.mjs        自检脚本
 test-*.mjs           回归测试
 ```
 
-## 致谢与许可
+## 致谢
 
-- 本项目基于 **[dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat)**（作者 WindyPro-rourou，
-  Apache-2.0）改造而来。日志面板、崩溃快照、进程/内存/逆向工具链等大量基础能力来自该项目，在此致谢。
-- 本项目新增：后端抽象层（Native/ADB）、统一坐标与帧元数据、Injector 本机部署与回退、`input_batch`
-  批量动作、诊断面板、无解压器安装兼容、按名自检与测试套件。
-- 许可：**Apache License 2.0**，见 [LICENSE](LICENSE) 与 [NOTICE](NOTICE)。
+本项目的面板 UI、日志与崩溃快照流程、进程/内存/逆向工具链起步于
+[dsh-logcat](https://github.com/WindyPro-rourou/dsh-logcat)（Apache-2.0），感谢原作者的工作。
+详细来源与改动范围见 [NOTICE](NOTICE)，许可为 [Apache-2.0](LICENSE)。
