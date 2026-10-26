@@ -1,0 +1,68 @@
+{
+  "name": "@katou-kouseki/dsha-native-control",
+  "description": "DSHA Native Control — an Android debugging workbench for the DSH web GUI that controls the device DSH itself runs on without ADB/USB/a PC (native backend via su/input/screencap), while keeping the original adb backend for desktop users. Live logcat stream, captured-crash snapshots, screenshots with coordinate metadata, batched gestures, and agent tools.",
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "^0.0.1-rc.1",
+    "ws": "^8.18.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "files": [
+    "lib/**/*.js",
+    "cordis.patch.yml",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsd",
+    "android",
+    "dsha",
+    "logcat",
+    "adb",
+    "ui-automation",
+    "on-device"
+  ],
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Kouseki",
+    "url": "https://github.com/Katou-Kouseki"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Katou-Kouseki/dsha-native-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Katou-Kouseki/dsha-native-control/issues"
+  },
+  "homepage": "https://github.com/Katou-Kouseki/dsha-native-control#readme"
+}

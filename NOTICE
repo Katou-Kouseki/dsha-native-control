@@ -1,0 +1,17 @@
+DSHA Native Control
+Copyright 2026 Kouseki
+
+This product is a derivative work based on dsh-logcat
+(https://github.com/WindyPro-rourou/dsh-logcat), Copyright WindyPro-rourou,
+licensed under the Apache License, Version 2.0.
+
+The following files and areas originate from dsh-logcat and were modified by
+this project: lib/index.js, lib/client.js, lib/injector-jar.js,
+tools/injector/Injector.java, and the panel UI/design surface.
+
+Changes made by this project include the native/ADB backend abstraction,
+unified screenshot coordinate handling and frame metadata, on-device Injector
+deployment with fallback, the input_batch tool, the diagnostics panel, and
+ZIP extraction without a system unzip binary.
+
+Licensed under the Apache License, Version 2.0. See LICENSE.

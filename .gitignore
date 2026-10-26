@@ -1,0 +1,18 @@
+# DSHA Native Control — repo hygiene
+node_modules/
+*.log
+.DS_Store
+*.tgz
+Thumbs.db
+
+# local env / secrets — never commit
+.env
+.env.*
+*.local
+npm-debug.log*
+
+# build artifact: the dex itself is embedded as base64 in lib/injector-jar.js
+# (rebuild with tools/injector/build.mjs)
+lib/injector.jar
+tools/injector/*.class
+tools/injector/*.dex
