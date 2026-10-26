@@ -75,7 +75,7 @@
 ## 4. 已知限制与风险
 
 1. **真机未验证**：所有 Android-only 行为（su 探测、app_process 注入器、screencap 权限、SELinux 拦截）均待 Redmi K20 Pro + DSHA 环境手工验收。
-2. **PowerShell 5.1**：测试脚本运行于 `powershell5` 沙箱，`&&` 不可用（用 `;` 分隔）；CLIXML profile 警告与 TRAE 沙箱临时目录报错为环境噪音，不影响断言结果。
+2. **PowerShell 5.1**：测试脚本运行于 `powershell5` 环境，`&&` 不可用（用 `;` 分隔）；CLIXML profile 警告与系统临时目录清理报错属于环境噪音，不影响断言结果。
 3. **Injector 性能**：上游宣称 3~5ms，本项目书 §4.2 明确禁止直接采信；见 PERF_REPORT.md。
 
 ## 5. 回归测试命令
