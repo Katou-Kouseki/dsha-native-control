@@ -66,6 +66,8 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 4. Open the panel: the status bar should read "Native 本机模式" and the device dropdown should show
    "本机设备（DSHA Native）".
 5. Open the toolbar "diagnostics" dialog to confirm Root and tool probe status.
+6. If the status bar says "本机后端不可用", run `node diagnose.mjs` in the DSH terminal to check whether the proot
+   container can see `/system` and `su`.
 
 ## Backend mode configuration
 
@@ -87,6 +89,13 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 
 ### Troubleshooting
 
+- **The local device is not detected (DSHA runs inside proot)**: the native backend needs `su`, `input` and
+  `screencap` to be reachable from the environment the DSH process lives in. A proot container usually mounts only
+  the distro rootfs, so `/system` may be missing or incomplete. Run `node diagnose.mjs` in the DSH terminal and
+  share its output — it lists `ANDROID_ROOT`, proot markers, the `su` path, the real `su -c id` result and the tool
+  probe, which tells "path not visible" apart from "root not granted".
+- **Status bar says "本机后端不可用"**: an Android host was detected but the native probe failed; open the
+  diagnostics dialog for the backend selection reason, root state and the raw `su` output.
 - **"Native 本机模式" but Root denied**: open the diagnostics panel to inspect Root state; grant `su` to DSH in
   Magisk's superuser list, then press refresh.
 - **Injector shows "blocked"**: after repeated launch failures the injector disables itself and falls back to

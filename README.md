@@ -63,6 +63,8 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 3. 启动 DSH Web，首次在 Magisk 弹窗中**授予 DSH `su` 权限**。
 4. 打开面板：状态栏应显示「Native 本机模式」，设备下拉显示「本机设备（DSHA Native）」。
 5. 点工具栏「诊断」确认 Root 与工具探测状态。
+6. 若状态栏显示「本机后端不可用」，在 DSH 终端执行 `node diagnose.mjs` 检查 proot 是否能看到 `/system`
+   与 `su`。
 
 ## 后端模式配置
 
@@ -83,6 +85,12 @@ dsh plugin --profile web add @katou-kouseki/dsha-native-control
 
 ### 故障排查
 
+- **检测不到本机设备（DSHA 运行在 proot 里）**：本机后端依赖 `su`、`input`、`screencap`，这些必须能在
+  DSH 进程所在环境里访问到。proot 容器通常只挂载了发行版根文件系统，`/system` 可能不可见或不完整。
+  在 DSH 的终端里执行 `node diagnose.mjs` 并把输出贴出来，它逐项列出 `ANDROID_ROOT`、proot 标记、
+  `su` 路径与 `su -c id` 的真实返回、工具探测结果，可直接定位是「路径不可见」还是「Root 未授权」。
+- **显示「本机后端不可用」**：状态栏出现该提示说明已识别出 Android 宿主，但本机后端探测未通过；点「诊断」
+  查看后端选择原因、Root 三态与 `su` 返回原文。
 - **显示「Native 本机模式」但 Root 被拒绝**：打开「诊断」面板查看 Root 状态；在 Magisk 超级用户列表里给
   DSH 授予 `su` 后点「刷新」。
 - **Injector 显示「已阻断」**：注入器连续启动失败后会自行停用并回退等价的系统命令（功能仍可用，单次动作
